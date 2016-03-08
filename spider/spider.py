@@ -12,6 +12,7 @@ from HTMLParser import HTMLParser
 import homeparser
 import threadparser
 import sqlite3
+import md5
 from bs4 import BeautifulSoup
 
 reload(sys)
@@ -29,7 +30,7 @@ downloaded_image_urls = ScalableBloomFilter(mode=ScalableBloomFilter.SMALL_SET_G
 #load context from file
 conn = sqlite3.connect('record.db')
 curs = conn.cursor()
-curs.execute('''create table if not exists downloaded_image_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
+curs.execute('''create table if not exists downloaded_image_url (id INTEGER PRIMARY KEY autoincrement, url text, md5 text)''')
 curs.execute('''create table if not exists parsed_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
 curs.execute('''create table if not exists wait_parse_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
 print 'finish create table'
@@ -63,8 +64,8 @@ while True:
         break
 print 'finish load data from table'
 
-def insert_url_in_image_table(url):
-    curs.execute('insert into downloaded_image_url (url) values (?)', (url,))
+def insert_url_in_image_table(url, md5):
+    curs.execute('insert into downloaded_image_url (url, md5) values (?, ?)', (url, md5))
     conn.commit()
 
 def insert_url_in_parsed_url_table(url):
@@ -98,7 +99,7 @@ def extract_urls(url):
     else:
         m = threadparser.ThreadParser(url)
 
-    directory = os.path.join(basePath, url)
+    directory = basePath
     try:
         stream = urllib2.urlopen(url)
         str = stream.read()
@@ -119,7 +120,9 @@ def extract_urls(url):
         if imageUrl in downloaded_image_urls:
             continue
         downloaded_image_urls.add(imageUrl)
-        insert_url_in_image_table(imageUrl)
+        md5Obj = md5.new(imageUrl)
+        md5Name = md5Obj.hexdigest()
+        insert_url_in_image_table(imageUrl, md5Name)
         imageName = None
         indexOfSlash = string.rfind(imageUrl, '/')
         if indexOfSlash != -1:
@@ -132,7 +135,7 @@ def extract_urls(url):
                 stream = urllib2.urlopen(imageUrl)
                 if stream is not None and stream.getcode() >= 200:
                     s = stream.read()
-                    filePath = os.path.join(directory, imageName)
+                    filePath = os.path.join(directory, md5Name)
                     file = open(filePath, 'wb+')
                     file.write(s)
                     file.close()
