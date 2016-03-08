@@ -19,7 +19,7 @@ sys.setdefaultencoding('utf-8')
 
 #init
 basePath = '/Users/kudocc/Desktop/papapa/'
-initial_page = 'http://tieba.baidu.com/f?ie=utf-8&kw=%E6%9D%80%E6%88%AE%E9%83%BD%E5%B8%82'
+initial_page = 'http://tieba.baidu.com/f?kw=%E7%82%89%E7%9F%B3%E4%BC%A0%E8%AF%B4&ie=utf-8'
 #initial_page = 'http://tieba.baidu.com/p/4308012877'
 url_queue = Queue.Queue()
 
