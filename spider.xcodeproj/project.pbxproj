@@ -6,10 +6,6 @@
 	objectVersion = 46;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		A76475021C8ED94E00ED2EC3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A76475011C8ED94E00ED2EC3 /* main.c */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		A76474FC1C8ED94E00ED2EC3 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -24,7 +20,11 @@
 
 /* Begin PBXFileReference section */
 		A76474FE1C8ED94E00ED2EC3 /* spider */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = spider; sourceTree = BUILT_PRODUCTS_DIR; };
-		A76475011C8ED94E00ED2EC3 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		A76475081C8ED98E00ED2EC3 /* homeparser.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = homeparser.py; sourceTree = "<group>"; };
+		A76475091C8ED98E00ED2EC3 /* spider.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = spider.py; sourceTree = "<group>"; };
+		A764750A1C8ED98E00ED2EC3 /* recorditem.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = recorditem.py; sourceTree = "<group>"; };
+		A764750B1C8ED98E00ED2EC3 /* threadparser.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = threadparser.py; sourceTree = "<group>"; };
+		A764750C1C8ED98E00ED2EC3 /* tiebaparser.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = tiebaparser.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,11 @@
 		A76475001C8ED94E00ED2EC3 /* spider */ = {
 			isa = PBXGroup;
 			children = (
-				A76475011C8ED94E00ED2EC3 /* main.c */,
+				A76475091C8ED98E00ED2EC3 /* spider.py */,
+				A76475081C8ED98E00ED2EC3 /* homeparser.py */,
+				A764750A1C8ED98E00ED2EC3 /* recorditem.py */,
+				A764750B1C8ED98E00ED2EC3 /* threadparser.py */,
+				A764750C1C8ED98E00ED2EC3 /* tiebaparser.py */,
 			);
 			path = spider;
 			sourceTree = "<group>";
@@ -118,7 +122,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A76475021C8ED94E00ED2EC3 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
