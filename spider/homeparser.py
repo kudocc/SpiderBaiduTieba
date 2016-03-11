@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import tiebaparser
 import urlparse
 from recorditem import RecordItem
 
+# 贴吧首页
 class HomeParser (tiebaparser.TieBaHTMLParser):
     def __init__(self, url):
         tiebaparser.TieBaHTMLParser.__init__(self, url)

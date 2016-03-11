@@ -57,11 +57,11 @@
 		A76475001C8ED94E00ED2EC3 /* spider */ = {
 			isa = PBXGroup;
 			children = (
-				A76475091C8ED98E00ED2EC3 /* spider.py */,
-				A76475081C8ED98E00ED2EC3 /* homeparser.py */,
 				A764750A1C8ED98E00ED2EC3 /* recorditem.py */,
-				A764750B1C8ED98E00ED2EC3 /* threadparser.py */,
 				A764750C1C8ED98E00ED2EC3 /* tiebaparser.py */,
+				A76475081C8ED98E00ED2EC3 /* homeparser.py */,
+				A764750B1C8ED98E00ED2EC3 /* threadparser.py */,
+				A76475091C8ED98E00ED2EC3 /* spider.py */,
 			);
 			path = spider;
 			sourceTree = "<group>";
@@ -240,6 +240,7 @@
 				A76475071C8ED94E00ED2EC3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

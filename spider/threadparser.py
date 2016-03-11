@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import tiebaparser
 import urlparse
 from recorditem import RecordItem
 
+# 帖子
 class ThreadParser (tiebaparser.TieBaHTMLParser):
     def __init__(self, url):
         tiebaparser.TieBaHTMLParser.__init__(self, url)

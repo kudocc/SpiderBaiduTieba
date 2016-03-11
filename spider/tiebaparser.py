@@ -14,6 +14,8 @@ class TieBaHTMLParser(HTMLParser.HTMLParser):
         self.tagClasses = {'p_postlist': RecordItem()}
         self.tagIds = {'thread_theme_5': RecordItem(), 'thread_list': RecordItem()}
         
+        self.meet_title = False
+        self.title = ''
         self.urls = []
         self.imageUrls = []
     
@@ -73,19 +75,30 @@ class TieBaHTMLParser(HTMLParser.HTMLParser):
                     return True
         return False
     
+    # subclass should override it
+    def filter_url(self, url):
+        '''return True, if `url` need to parse, else return False'''
+        return True
+    
     def handle_endtag(self, tag):
+        if tag == 'title':
+            self.meet_title = False
+        
         item = self.get_one_item()
         if item is None:
             return
         item.records -= 1
         #print 'end tag:', tag, ' record:', item.records
-
-    # subclass should override it
-    def filter_url(self, url):
-        '''return True, if `url` need to parse, else return False'''
-        return True
+    
+    def handle_data(self, data):
+        if self.meet_title:
+            self.title = data
 
     def handle_starttag(self, tag, attrs):
+        
+        if tag == 'title':
+            self.meet_title = True
+        
         item = None
         
         # this attrs is fit

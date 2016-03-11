@@ -13,6 +13,7 @@ import homeparser
 import threadparser
 import sqlite3
 import md5
+import datetime
 from bs4 import BeautifulSoup
 
 reload(sys)
@@ -30,13 +31,13 @@ downloaded_image_urls = ScalableBloomFilter(mode=ScalableBloomFilter.SMALL_SET_G
 #load context from file
 conn = sqlite3.connect('record.db')
 curs = conn.cursor()
-curs.execute('''create table if not exists downloaded_image_url (id INTEGER PRIMARY KEY autoincrement, url text, md5 text)''')
-curs.execute('''create table if not exists parsed_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
+curs.execute('''create table if not exists downloaded_image_url (id INTEGER PRIMARY KEY autoincrement, tiebar_url text, image_url text, md5 text)''')
+curs.execute('''create table if not exists parsed_url (id INTEGER PRIMARY KEY autoincrement, url text, title text, parsed_time date)''')
 curs.execute('''create table if not exists wait_parse_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
 print 'finish create table'
 
 #load downloaded image urls
-curs.execute('select url from downloaded_image_url')
+curs.execute('select image_url from downloaded_image_url')
 while True:
     url = curs.fetchone()
     if url is not None:
@@ -62,14 +63,17 @@ while True:
         url_queue.put(url[0])
     else:
         break
-print 'finish load data from table'
+# remove wait parse queue urls
+curs.execute('delete from wait_parse_url')
 
-def insert_url_in_image_table(url, md5):
-    curs.execute('insert into downloaded_image_url (url, md5) values (?, ?)', (url, md5))
+print '----------finish load data from table-----------'
+
+def insert_url_in_image_table(tiebarUrl, imageUrl, md5):
+    curs.execute('insert into downloaded_image_url (tiebar_url, image_url, md5) values (?, ?, ?)', (tiebarUrl, imageUrl, md5))
     conn.commit()
 
-def insert_url_in_parsed_url_table(url):
-    curs.execute('insert into parsed_url (url) values (?)', (url,))
+def insert_url_in_parsed_url_table(url, title, datetime):
+    curs.execute('insert into parsed_url (url, title, parsed_time) values (?, ?, ?)', (url, title, datetime))
     conn.commit()
 
 def clear_wait_parse_url_table():
@@ -105,9 +109,7 @@ def extract_urls(url):
         str = stream.read()
         soup = BeautifulSoup(str, 'html.parser')
         pretty_str = soup.prettify()
-        print pretty_str
         m.feed(pretty_str)
-        print 'after feed'
     except (urllib2.URLError, ) as e:
         print 'exception raised when parse url:', url, 'reason:', e.reason
         return []
@@ -119,33 +121,39 @@ def extract_urls(url):
     for imageUrl in m.imageUrls:
         if imageUrl in downloaded_image_urls:
             continue
-        downloaded_image_urls.add(imageUrl)
-        md5Obj = md5.new(imageUrl)
-        md5Name = md5Obj.hexdigest()
-        insert_url_in_image_table(imageUrl, md5Name)
-        imageName = None
-        indexOfSlash = string.rfind(imageUrl, '/')
-        if indexOfSlash != -1:
-            imageName = imageUrl[indexOfSlash+1:]
-        else:
-            imageName = str(datetime.datetime.utcnow())
-        print 'downloaded image url:', imageUrl
-        if imageName is not None:
-            try:
-                stream = urllib2.urlopen(imageUrl)
-                if stream is not None and stream.getcode() >= 200:
-                    s = stream.read()
-                    filePath = os.path.join(directory, md5Name)
-                    file = open(filePath, 'wb+')
-                    file.write(s)
-                    file.close()
-                    print 'downloaded image url:', imageUrl, ' at location:', filePath
-            except (urllib2.URLError, Exception) as e:
-                print 'exception raised when download ', imageUrl , ' reason:', e.reason
+        
+        # download image
+        suffix = '.'
+        dotPos = string.rfind(imageUrl, '.')
+        if dotPos != -1:
+            suffix = imageUrl[dotPos:]
+        try:
+            stream = urllib2.urlopen(imageUrl)
+            if stream is not None and stream.getcode() >= 200:
+                # md5 + suffix
+                md5Obj = md5.new(imageUrl)
+                md5Name = md5Obj.hexdigest()
+                md5Name += suffix
+                
+                s = stream.read()
+                filePath = os.path.join(directory, md5Name)
+                file = open(filePath, 'wb+')
+                file.write(s)
+                file.close()
+                
+                downloaded_image_urls.add(imageUrl)
+                # keep record in db
+                insert_url_in_image_table(url, imageUrl, md5Name)
+                    
+                print 'downloaded image url:', imageUrl, ' at location:', filePath
+        except urllib2.URLError as e:
+            print 'exception raised when download ', imageUrl , ' reason:', e
+        except IOError as e:
+            print 'exception raised when save', imageUrl , ' reason:', e
 
     # finish parsing url
     parsed_urls.add(url)
-    insert_url_in_parsed_url_table(url)
+    insert_url_in_parsed_url_table(url, m.title, datetime.datetime.now())
 
     return m.urls
 
@@ -160,7 +168,6 @@ def main():
             if url_queue.qsize() > 0:
                 current_url = url_queue.get()
                 urls = extract_urls(current_url)
-                print 'extract url:', current_url, 'result:', urls
                 for next_url in urls:
                     if next_url not in parsed_urls:
                         url_queue.put(next_url)
@@ -168,6 +175,7 @@ def main():
                 break
 
     except KeyboardInterrupt:
+        print 'KeyboardInterrupt, let\'s keep records in db'
         clear_wait_parse_url_table()
         if current_url is not None:
             insert_url_in_wait_parse_url_table(current_url)
@@ -184,3 +192,5 @@ def main():
             os._exit(0)
 
 main()
+
+print 'end process'
