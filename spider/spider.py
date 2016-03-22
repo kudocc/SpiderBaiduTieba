@@ -16,6 +16,17 @@ import md5
 import datetime
 from bs4 import BeautifulSoup
 
+class SetQueue(Queue.Queue):
+    
+    def _init(self, maxsize):
+        Queue.Queue._init(self, maxsize)
+        self.all_items = set()
+    
+    def _put(self, item):
+        if item not in self.all_items:
+            Queue.Queue._put(self, item)
+            self.all_items.add(item)
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -23,7 +34,7 @@ sys.setdefaultencoding('utf-8')
 basePath = '/Users/kudocc/Desktop/papapa/'
 initial_page = 'http://tieba.baidu.com/f?kw=%E7%82%89%E7%9F%B3%E4%BC%A0%E8%AF%B4&ie=utf-8'
 #initial_page = 'http://tieba.baidu.com/p/4308012877'
-url_queue = Queue.Queue()
+url_queue = SetQueue()
 
 parsed_urls = ScalableBloomFilter(mode=ScalableBloomFilter.SMALL_SET_GROWTH)
 downloaded_image_urls = ScalableBloomFilter(mode=ScalableBloomFilter.SMALL_SET_GROWTH)
@@ -68,8 +79,8 @@ curs.execute('delete from wait_parse_url')
 
 print '----------finish load data from table-----------'
 
-def insert_url_in_image_table(tiebarUrl, imageUrl, md5):
-    curs.execute('insert into downloaded_image_url (tiebar_url, image_url, md5) values (?, ?, ?)', (tiebarUrl, imageUrl, md5))
+def insert_url_in_image_table(tiebarUrl, imageUrl, md5, image_size):
+    curs.execute('insert into downloaded_image_url (tiebar_url, image_url, md5, image_size) values (?, ?, ?, ?)', (tiebarUrl, imageUrl, md5, image_size))
     conn.commit()
 
 def insert_url_in_parsed_url_table(url, title, datetime):
@@ -143,8 +154,9 @@ def extract_urls(url):
                 
                 downloaded_image_urls.add(imageUrl)
                 # keep record in db
-                insert_url_in_image_table(url, imageUrl, md5Name)
-                    
+                image_size = stream.headers["Content-Length"]
+                insert_url_in_image_table(url, imageUrl, md5Name, image_size)
+                
                 print 'downloaded image url:', imageUrl, ' at location:', filePath
         except urllib2.URLError as e:
             print 'exception raised when download ', imageUrl , ' reason:', e
@@ -155,6 +167,7 @@ def extract_urls(url):
     parsed_urls.add(url)
     insert_url_in_parsed_url_table(url, m.title, datetime.datetime.now())
 
+    print 'end parse url'
     return m.urls
 
 def main():
@@ -183,8 +196,11 @@ def main():
             list = []
             while url_queue.qsize() > 0:
                 url = url_queue.get()
-                list.append((url, ))
-            insert_urls_in_wait_parse_url_table(list)
+                if url not in parsed_urls and url not in list:
+                    print 'url:', url, 'not in parsed_urls'
+                    list.append((url, ))
+            if len(list) > 0:
+                insert_urls_in_wait_parse_url_table(list)
         conn.close()
         try:
             sys.exit(0)
