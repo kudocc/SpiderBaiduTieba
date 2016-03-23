@@ -19,6 +19,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A714EFCC1CA270CB00D00E90 /* db_copy_with_index.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = db_copy_with_index.py; sourceTree = "<group>"; };
+		A714EFCD1CA2718700D00E90 /* test_index.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = test_index.py; sourceTree = "<group>"; };
 		A76398C61CA142B1002619FD /* migratedb.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = migratedb.py; sourceTree = "<group>"; };
 		A76474FE1C8ED94E00ED2EC3 /* spider */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = spider; sourceTree = BUILT_PRODUCTS_DIR; };
 		A76475081C8ED98E00ED2EC3 /* homeparser.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = homeparser.py; sourceTree = "<group>"; };
@@ -39,6 +41,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A714EFCA1CA2704600D00E90 /* db_index */ = {
+			isa = PBXGroup;
+			children = (
+				A714EFCC1CA270CB00D00E90 /* db_copy_with_index.py */,
+				A714EFCD1CA2718700D00E90 /* test_index.py */,
+			);
+			name = db_index;
+			sourceTree = "<group>";
+		};
 		A76398C41CA13EB5002619FD /* migrate_db */ = {
 			isa = PBXGroup;
 			children = (
@@ -66,6 +77,7 @@
 		A76475001C8ED94E00ED2EC3 /* spider */ = {
 			isa = PBXGroup;
 			children = (
+				A714EFCA1CA2704600D00E90 /* db_index */,
 				A76398C41CA13EB5002619FD /* migrate_db */,
 				A764750A1C8ED98E00ED2EC3 /* recorditem.py */,
 				A764750C1C8ED98E00ED2EC3 /* tiebaparser.py */,

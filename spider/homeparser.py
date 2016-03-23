@@ -9,7 +9,7 @@ class HomeParser (tiebaparser.TieBaHTMLParser):
         tiebaparser.TieBaHTMLParser.__init__(self, url)
         self.tagClasses = {}
         # 'thread_list' is for thread, 'frs_list_pager' is for page index
-        self.tagIds = {'thread_list': RecordItem(), 'frs_list_pager': RecordItem()}
+        self.tagIds = {'threadListGroupCnt': RecordItem(), 'thread_list': RecordItem(), 'frs_list_pager': RecordItem()}
         self.param_kw = self.query_string_value_of_key(url, 'kw')
     
     def query_string_value_of_key(self, url, key):

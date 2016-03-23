@@ -38,9 +38,12 @@ conn_from = sqlite3.connect('record.db')
 curs_from = conn_from.cursor()
 
 #new
-conn = sqlite3.connect('record_new.db')
+conn = sqlite3.connect('record_index.db')
 curs = conn.cursor()
 curs.execute('''create table if not exists downloaded_image_url (id INTEGER PRIMARY KEY autoincrement, tiebar_url text, image_url text, md5 text, image_size integer)''')
+curs.execute('''create index if not exists downloaded_image_url_index1 on downloaded_image_url(image_url)''')
+curs.execute('''create index if not exists downloaded_image_url_index2 on downloaded_image_url(image_size)''')
+
 curs.execute('''create table if not exists parsed_url (id INTEGER PRIMARY KEY autoincrement, url text, title text, parsed_time date)''')
 curs.execute('''create table if not exists wait_parse_url (id INTEGER PRIMARY KEY autoincrement, url text)''')
 
@@ -56,7 +59,7 @@ while True:
         tiebar_url = url[1]
         image_url = url[2]
         md5 = url[3]
-        image_size = 0
+        image_size = url[4]
         insert_url_in_image_table(tiebar_url, image_url, md5, image_size)
     else:
         break
@@ -88,5 +91,7 @@ while True:
     else:
         break
 
-print '----------finish load data from table-----------'
+conn_from.close()
+conn.close()
 
+print '----------finish load data from table-----------'

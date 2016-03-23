@@ -14,6 +14,7 @@ import threadparser
 import sqlite3
 import md5
 import datetime
+import socket
 from bs4 import BeautifulSoup
 
 class SetQueue(Queue.Queue):
@@ -106,6 +107,8 @@ def is_url_home(url):
     else:
         return False
 
+socket.setdefaulttimeout(10)
+
 def extract_urls(url):
     print 'begin parse url:', url
     m = None
@@ -116,13 +119,28 @@ def extract_urls(url):
 
     directory = basePath
     try:
-        stream = urllib2.urlopen(url)
-        str = stream.read()
-        soup = BeautifulSoup(str, 'html.parser')
-        pretty_str = soup.prettify()
-        m.feed(pretty_str)
-    except (urllib2.URLError, ) as e:
-        print 'exception raised when parse url:', url, 'reason:', e.reason
+        retry_times = 0
+        while 1:
+            try:
+                stream = urllib2.urlopen(url)
+                if stream is not None:
+                    str = stream.read()
+                    soup = BeautifulSoup(str, 'html.parser')
+                    pretty_str = soup.prettify()
+                    m.feed(pretty_str)
+                    stream.close()
+                    break
+                else:
+                    return []
+            except socket.timeout:
+                print 'socket timeout'
+                if retry_times > 1:
+                    print 'socket timeout exceed max retry times, failed'
+                    break
+                ++retry_times
+
+    except urllib2.URLError as e:
+        print 'exception raised when parse url:', url, 'reason:', e
         return []
 
     # make dir
@@ -157,7 +175,7 @@ def extract_urls(url):
                 image_size = stream.headers["Content-Length"]
                 insert_url_in_image_table(url, imageUrl, md5Name, image_size)
                 
-                print 'downloaded image url:', imageUrl, ' at location:', filePath
+                print 'downloaded image url:', imageUrl
         except urllib2.URLError as e:
             print 'exception raised when download ', imageUrl , ' reason:', e
         except IOError as e:
@@ -208,5 +226,6 @@ def main():
             os._exit(0)
 
 main()
+conn.close()
 
 print 'end process'
